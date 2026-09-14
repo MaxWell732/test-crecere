@@ -1,0 +1,90 @@
+# Lexicons used by E3 (hallucination blacklist), E7 (masking) and E8c (friction, politeness, fillers, D proposals).
+# Matching is done on NORMALIZED text: casefold, accents stripped (á->a, ñ kept as n), punctuation -> space,
+# whitespace collapsed. Patterns below are therefore written lowercase and accent-free.
+# Any change: bump configs/pipeline.yaml `version` and log it in docs/decisions.md.
+
+# E3: segment text that normalizes to exactly one of these is dropped (logged).
+hallucination_blacklist:
+  - subtitulos realizados por la comunidad de amara org
+  - subtitulos por la comunidad de amara org
+  - subtitulado por la comunidad de amara org
+  - gracias por ver el video
+  - muchas gracias por ver el video
+  - gracias por ver
+  - suscribete
+  - suscribete al canal
+  - no olvides suscribirte
+  - gracias por su atencion y hasta la proxima
+  - musica
+  - aplausos
+
+# E5 (D-021): a minority-speaker run made only of these tokens is never reassigned by sentence smoothing.
+# All quoted: YAML 1.1 would read a bare `no` as boolean false.
+backchannel_tokens: ["si", "aja", "ajam", "mhm", "mm", "mmm", "hm", "eh", "ok", "okay", "oka", "claro", "listo", "vale",
+                     "bueno", "ya", "exacto", "correcto", "perfecto", "entiendo", "aha", "uhum", "uh", "ah", "oh", "gracias",
+                     "senor", "senora", "no"]
+
+# E7: applied to AGENT turns only; each match replaced by [AGENTE] in the rendered transcript (blinding).
+agent_masking:
+  - '\bsoy (un |una )?(ia|i a|inteligencia artificial|asistente virtual|agente virtual|asistente digital|robot|bot)\b'
+  - '\b(asistente|agente|agenta|operadora|operador) (virtual|digital|automatic[oa]|inteligente)\b'
+  - '\binteligencia artificial\b'
+  - '\b(sistema|voz|mensaje|llamada) (automatizad[oa]|automatic[oa]|grabad[oa])\b'
+  - '\b(robot|chatbot|bot)\b'
+
+# E8c: repeat requests (both roles).
+repeat_requests:
+  full_utterance:            # the whole (normalized) turn/backchannel text equals one of these
+    - perdon
+    - como
+    - que
+    - mande
+    - como dijo
+    - como asi
+    - que dijo
+  anywhere:
+    - '\bno (le|te|lo|la) (entendi|entiendo|escuche|escucho|oi|oigo)\b'
+    - '\bno (entendi|escuche)\b'
+    - '\bme (repite|repites|repetiria|repetirias)\b'
+    - '\b(puede|podria|puedes|podrias|pudiera) (repetir|repetirme)\b'
+    - '\brepitame\b'
+    - '\bno se (escucha|oye|entiende)\b'
+  alo_after_s:               # counted only when the utterance starts > features.repeat_request_alo_after_s after conv_start
+    - '^((alo|halo)\s*)+$'
+    - '\b(alo|halo)\b.*\b(me escucha|me escuchas|me oye|me oyes|esta ahi|estas ahi|sigue ahi)\b'
+
+# E8c/E9: D proposes, L confirms (CLIENT turns).
+asks_if_robot:
+  - '\b(robot|maquina|grabacion|contestadora|inteligencia artificial|chatbot|bot)\b'
+  - '\b(es|eres|usted es|esto es|estoy hablando con) (un |una )?(ia|i a|asistente virtual|persona real|humano|humana)\b'
+  - '\b(una|un) (voz|mensaje) (grabad[oa]|automatic[oa])\b'
+asks_for_human:
+  - '\b(hablar|comunicarme|comunicar|pasar|comuniqueme|comuniqueme|paseme|paseme|comunicame|pasame)( me)? con (un |una |el |la |alguna |algun )?(persona|humano|humana|asesor|asesora|agente|operador|operadora|funcionario|funcionaria|alguien)\b'
+  - '\b(persona|asesor|asesora|agente) (real|de verdad|humano|humana)\b'
+  - '\bquiero (un |una )?(asesor|asesora|persona|humano)\b'
+
+# E8c: politeness markers (AGENT turns).
+politeness:
+  - '\bpor favor\b'
+  - '\bgracias\b'
+  - '\bcon gusto\b'
+  - '\bdisculpe\b'
+  - '\bque pena\b'
+  - '\ble entiendo\b'
+  - '\bmuy amable\b'
+
+# E8c: fillers (AGENT turns). Kept in tables only if validated against WER references (§10.2 K).
+fillers:
+  - '\beh+\b'
+  - '\bem+\b'
+  - '\bmm+\b'
+  - '\beste\b(?= (eh|em|pues|bueno|o sea)\b)'
+  - '\bo sea\b'
+  - '\bpues\b'
+  - '\bbueno\b'
+
+# E7: residual PII scan (rendered transcripts). Hits logged to data/logs/pii_scan.log.
+pii_patterns:
+  long_digits: '\d{6,}'
+  mobile_co: '\b3\d{9}\b'
+  email: '[\w.+-]+@[\w-]+\.[\w.]+'

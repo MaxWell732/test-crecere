@@ -1,0 +1,172 @@
+# Single source for the data dictionary (E11) and output validation (E11), plus reliability wiring (E10).
+#
+# type:     str | int | float | bool | enum | tri | list
+#           tri  = string enum "true" / "false" / "na"   (bool|"na" annotation fields)
+#           Amounts that may be "censored" are null in `calls` when censored (D-029); `offers` keeps `amount_censored`.
+# nullable: default true.   source: D | A | L | D over L | D+L | L+D
+# depends:  [roles] / [asr] — deterministic variables inherit `flag` when role accuracy / WER differ by group (E10).
+# validate_with: {gold: <gold_annotations.csv column>, metric: kappa|wkappa|exact|spearman|f1}; L variables without it
+#           are judged on self-consistency κ (rerun vs first run) and can at best be `flag` (D-013).
+# Any change: bump configs/pipeline.yaml `version`, log in docs/decisions.md.
+
+tables:
+  calls:
+    # ---------------------------------------------------------------- A. ID & quality
+    - {name: call_id, type: str, nullable: false, source: D, description: "Anonymous call ID (C001…C100)"}
+    - {name: group, type: enum, allowed: [human, ai], nullable: false, source: D, description: "Agent type, from subfolder; joined in E11"}
+    - {name: duration_file_s, type: float, unit: s, source: D, nullable: false, description: "File length"}
+    - {name: snr_db, type: float, unit: dB, source: A, description: "10·log10(mean speech-frame power / mean non-speech-frame power), censor and exact zeros excluded"}
+    - {name: clipping_pct, type: float, unit: "%", source: A, description: "% samples at >= 0.999 full scale"}
+    - {name: level_dbfs, type: float, unit: dBFS, source: A, description: "RMS level of speech frames"}
+    - {name: speech_ratio, type: float, unit: fraction, source: A, description: "Speech seconds / (duration − censored_s)"}
+    - {name: censored_s, type: float, unit: s, source: A, description: "Seconds detected as censored (E0)"}
+    - {name: n_censor_segments, type: int, source: A, description: "Number of censor spans (E0)"}
+    - {name: asr_confidence, type: float, unit: probability, source: D, description: "Duration-weighted mean word probability"}
+    - {name: asr_low_conf_pct, type: float, unit: "%", source: D, description: "% words with probability < 0.5"}
+    - {name: n_speakers_detected, type: int, source: D, description: "Distinct diarization speakers"}
+    - {name: flags, type: list, nullable: false, source: D, allowed: [low_snr, high_clipping, low_asr_conf, no_speech, censor_heavy, one_speaker, three_speakers, hallucination_removed, roles_manual_fix, diar_corrected, quote_verification_failed, agent_spoke_first, annotation_missing, stereo_downmixed], description: "Quality warnings"}
+    # ---------------------------------------------------------------- B. Contact
+    - {name: contact_type, type: enum, source: L, allowed: [no_answer, voicemail, ivr, wrong_number, hangup_before_identification, third_party, account_holder, unclear], validate_with: {gold: contact_type, metric: kappa}, description: "Who/what was reached"}
+    - {name: identity_validated, type: tri, source: L, allowed: ["true", "false", "na"], validate_with: {gold: identity_validated, metric: kappa}, description: "Agent explicitly confirms the account holder (name or ID) at any point"}
+    # ---------------------------------------------------------------- C. Debt context
+    - {name: product, type: enum, source: L, allowed: [credit_card, personal_loan, vehicle_loan, mortgage, payroll_loan, microcredit, telecom_services, other, unknown], description: "Type of debt"}
+    - {name: debt_amount, type: float, unit: COP, source: L, description: "Total debt amount stated (null if not stated or censored)"}
+    - {name: overdue_amount, type: float, unit: COP, source: L, description: "Overdue amount stated (null if not stated or censored)"}
+    - {name: non_payment_reasons, type: list, nullable: false, source: L, allowed: [unemployment_income_loss, forgot, illness_calamity, over_indebtedness, disputes_charge, doesnt_recognize_debt_fraud, already_paid, payment_channel_problem, other, not_stated], description: "All reasons for non-payment stated, primary (the one the client stresses most) first; not_stated if none; empty only if annotation missing"}
+    # ---------------------------------------------------------------- D. Outcome & PTP
+    - {name: final_outcome, type: enum, source: L, allowed: [no_contact, third_party, holder_refuses, no_agreement, callback_scheduled, claims_already_paid, vague_promise, firm_promise], validate_with: {gold: final_outcome, metric: wkappa}, description: "Ordinal outcome 0 no_contact … 7 firm_promise"}
+    - {name: final_outcome_rank, type: int, min: 0, max: 7, source: D over L, description: "Ordinal rank of final_outcome (0–7)"}
+    - {name: ptp, type: bool, source: L, validate_with: {gold: ptp, metric: kappa}, description: "Account holder commits to pay (firm or vague)"}
+    - {name: ptp_type_commitment, type: enum, source: L, allowed: [firm, vague, na], description: "firm = explicit unconditional; vague = conditional/uncertain"}
+    - {name: ptp_amount, type: float, unit: COP, source: L, validate_with: {gold: ptp_amount, metric: exact}, description: "Amount promised (null if not stated or censored)"}
+    - {name: ptp_date, type: str, source: L, validate_with: {gold: ptp_date_text, metric: exact}, description: "Promise date as stated (\"censored\" if censored)"}
+    - {name: ptp_type, type: enum, source: L, allowed: [full, partial], description: "Promise relative to overdue amount"}
+    - {name: ptp_confirmed_by_client, type: tri, source: L, allowed: ["true", "false", "na"], validate_with: {gold: ptp_confirmed_by_client, metric: kappa}, description: "Client explicitly confirms final terms"}
+    - {name: agent_recapped, type: tri, source: L, allowed: ["true", "false", "na"], validate_with: {gold: agent_recapped, metric: kappa}, description: "Agent restates amount/date/channel before closing"}
+    - {name: callback_scheduled, type: bool, source: L, description: "A new contact is agreed"}
+    - {name: ptp_strength, type: int, min: 0, max: 3, source: D over L, description: "(amount is a number) + (date not null) + confirmed; null if ptp=false"}
+    # ---------------------------------------------------------------- E. Negotiation
+    - {name: had_negotiation, type: bool, source: L, description: "Any payment option or amount/date discussed"}
+    - {name: n_offers_agent, type: int, source: D over L, validate_with: {gold: n_offers_agent, metric: spearman}, description: "Offers proposed by the agent"}
+    - {name: n_counteroffers_client, type: int, source: D over L, description: "Offers proposed by the client"}
+    - {name: first_anchor, type: enum, source: L, allowed: [agent, client, none], validate_with: {gold: first_anchor, metric: kappa}, description: "Who states the first amount or date proposal"}
+    # ---------------------------------------------------------------- F. Objections
+    - {name: n_objections, type: int, source: D over L, validate_with: {gold: n_objections, metric: spearman}, description: "Rows in objections"}
+    - {name: n_objections_resolved, type: int, source: D over L, description: "Objections with resolved = yes"}
+    - {name: n_objections_partial, type: int, source: D over L, description: "Objections with resolved = partial"}
+    - {name: pct_objections_resolved, type: float, unit: "%", source: D over L, description: "100 · resolved yes / n_objections; null if 0"}
+    # ---------------------------------------------------------------- G. Conversation dynamics
+    - {name: conv_duration_s, type: float, unit: s, source: D, depends: [roles], description: "Last non-SYSTEM speech end − conv_start"}
+    - {name: agent_speech_s, type: float, unit: s, source: D, depends: [roles], description: "AGENT speech time (overlap counts for both roles; censor excluded)"}
+    - {name: client_speech_s, type: float, unit: s, source: D, depends: [roles], description: "CLIENT speech time"}
+    - {name: agent_talk_share, type: float, unit: fraction, source: D, depends: [roles], description: "agent_speech_s / (agent_speech_s + client_speech_s)"}
+    - {name: silence_pct, type: float, unit: "%", source: D, depends: [roles], description: "Non-speech non-censored time in conversation / (conv_duration − censored)"}
+    - {name: n_turns, type: int, source: D, depends: [roles], description: "Non-backchannel non-SYSTEM turns"}
+    - {name: turns_per_min, type: float, unit: 1/min, source: D, depends: [roles], description: "n_turns per conversation minute"}
+    - {name: mean_turn_s_agent, type: float, unit: s, source: D, depends: [roles], description: "Mean AGENT turn duration"}
+    - {name: mean_turn_s_client, type: float, unit: s, source: D, depends: [roles], description: "Mean CLIENT turn duration"}
+    - {name: max_agent_monologue_s, type: float, unit: s, source: D, depends: [roles], description: "Longest AGENT turn"}
+    - {name: n_monologues_30s, type: int, source: D, depends: [roles], description: "AGENT turns >= 30 s"}
+    - {name: agent_latency_median_s, type: float, unit: s, source: D, depends: [roles], description: "Median latency over CLIENT→AGENT transfers without overlap"}
+    - {name: agent_latency_p90_s, type: float, unit: s, source: D, depends: [roles], description: "90th percentile of the same"}
+    - {name: client_latency_median_s, type: float, unit: s, source: D, depends: [roles], description: "Median latency over AGENT→CLIENT transfers"}
+    - {name: agent_spoke_first, type: bool, source: D, depends: [roles], description: "First non-SYSTEM speech is AGENT"}
+    - {name: time_to_first_agent_voice_s, type: float, unit: s, source: D, depends: [roles], description: "End of client's first utterance → first AGENT turn; null if agent spoke first"}
+    - {name: dead_air_count, type: int, source: D, depends: [roles], description: "Gaps without speech (censor excluded) >= 3 s within the conversation"}
+    - {name: dead_air_s, type: float, unit: s, source: D, depends: [roles], description: "Total duration of those gaps"}
+    - {name: interruptions_per_min_agent, type: float, unit: 1/min, source: D, depends: [roles], description: "AGENT interrupts CLIENT per conversation minute"}
+    - {name: interruptions_per_min_client, type: float, unit: 1/min, source: D, depends: [roles], description: "CLIENT interrupts AGENT per conversation minute"}
+    - {name: overlap_s, type: float, unit: s, source: D, depends: [roles], description: "Total overlapped speech time"}
+    - {name: yield_time_s, type: float, unit: s, source: D, depends: [roles], description: "Median over CLIENT interruptions of AGENT: interruption start → end of agent speech"}
+    - {name: backchannels_agent_per_min, type: float, unit: 1/min, source: D, depends: [roles], description: "AGENT backchannels per minute"}
+    - {name: words_per_min_agent, type: float, unit: words/min, source: D, depends: [roles, asr], description: "AGENT words per speech minute"}
+    - {name: words_per_min_client, type: float, unit: words/min, source: D, depends: [roles, asr], description: "CLIENT words per speech minute"}
+    - {name: time_to_identification_s, type: float, unit: s, source: D over L, description: "Start of pass-A identification milestone turn − conv_start"}
+    - {name: time_to_debt_mention_s, type: float, unit: s, source: D over L, description: "Same for debt mention"}
+    - {name: time_to_first_offer_s, type: float, unit: s, source: D over L, description: "Same for first offer"}
+    - {name: time_to_ptp_s, type: float, unit: s, source: D over L, description: "Same for promise to pay"}
+    - {name: closing_by, type: enum, source: L, allowed: [agent, client_hangup, cut_unclear], description: "Who closes the call (checked against last_turn_role)"}
+    - {name: last_turn_role, type: enum, source: D, depends: [roles], allowed: [AGENT, CLIENT, THIRD_PARTY, SYSTEM, UNKNOWN], description: "Role of the last turn (D check for closing_by)"}
+    # ---------------------------------------------------------------- H. Friction
+    - {name: repeat_requests, type: int, source: D, depends: [asr], description: "Repeat-request lexicon hits, both roles"}
+    - {name: repeat_requests_agent, type: int, source: D, depends: [roles, asr], description: "Repeat requests by AGENT"}
+    - {name: repeat_requests_client, type: int, source: D, depends: [roles, asr], description: "Repeat requests by CLIENT"}
+    - {name: mechanical_repetition, type: bool, source: D, depends: [roles, asr], description: "Two AGENT turns >= 5 words with token_set_ratio >= 80"}
+    - {name: agent_misunderstood, type: int, source: L, description: "AGENT turns showing failure to understand the client"}
+    - {name: incoherent_responses, type: int, source: L, description: "AGENT turns not responding to the preceding client content"}
+    - {name: client_expresses_annoyance, type: bool, source: L, description: "Explicit annoyance or anger"}
+    # ---------------------------------------------------------------- I. Script & compliance
+    - {name: greets, type: tri, source: L, allowed: ["true", "false", "na"], validate_with: {gold: greets, metric: kappa}, description: "Opening greeting"}
+    - {name: identifies_self, type: tri, source: L, allowed: ["true", "false", "na"], validate_with: {gold: identifies_self, metric: kappa}, description: "Agent states own name/role and the entity"}
+    - {name: recording_notice, type: tri, source: L, allowed: ["true", "false", "na"], validate_with: {gold: recording_notice, metric: kappa}, description: "Says the call is recorded"}
+    - {name: validates_identity_before_disclosing, type: tri, source: L, allowed: ["true", "false", "na"], validate_with: {gold: validates_identity_before_disclosing, metric: kappa}, description: "Identity confirmed before any debt detail"}
+    - {name: states_amount, type: tri, source: L, allowed: ["true", "false", "na"], validate_with: {gold: states_amount, metric: kappa}, description: "Amount owed or overdue stated"}
+    - {name: states_due_date, type: tri, source: L, allowed: ["true", "false", "na"], validate_with: {gold: states_due_date, metric: kappa}, description: "Due date or days overdue stated"}
+    - {name: offers_payment_channels, type: tri, source: L, allowed: ["true", "false", "na"], validate_with: {gold: offers_payment_channels, metric: kappa}, description: "At least one channel named"}
+    - {name: mentions_credit_bureaus, type: tri, source: L, allowed: ["true", "false", "na"], validate_with: {gold: mentions_credit_bureaus, metric: kappa}, description: "Mentions reporting to credit bureaus"}
+    - {name: recaps_agreement, type: tri, source: L, allowed: ["true", "false", "na"], validate_with: {gold: recaps_agreement, metric: kappa}, description: "Restates the agreement (na if no ptp)"}
+    - {name: polite_closing, type: tri, source: L, allowed: ["true", "false", "na"], validate_with: {gold: polite_closing, metric: kappa}, description: "Courteous goodbye"}
+    - {name: script_checklist_score, type: float, unit: "%", source: D over L, description: "% true over non-na script items; null unless account_holder"}
+    - {name: debt_disclosed_to_third_party, type: tri, source: L, allowed: ["true", "false", "na"], validate_with: {gold: debt_disclosed_to_third_party, metric: kappa}, description: "Debt existence/amount revealed to a non-account-holder"}
+    - {name: coercive_language, type: tri, source: L, allowed: ["true", "false", "na"], description: "Threats, intimidation, humiliation"}
+    # ---------------------------------------------------------------- J. Rubric (pass B); "NA" -> null
+    - {name: clarity, type: int, min: 1, max: 5, source: L, validate_with: {gold: clarity, metric: wkappa}, description: "Rubric 1–5 (null = NA)"}
+    - {name: empathy, type: int, min: 1, max: 5, source: L, validate_with: {gold: empathy, metric: wkappa}, description: "Rubric 1–5"}
+    - {name: active_listening, type: int, min: 1, max: 5, source: L, validate_with: {gold: active_listening, metric: wkappa}, description: "Rubric 1–5"}
+    - {name: objection_handling, type: int, min: 1, max: 5, source: L, description: "Rubric 1–5 (null = NA, no objections)"}
+    - {name: control_focus, type: int, min: 1, max: 5, source: L, description: "Rubric 1–5"}
+    - {name: professionalism, type: int, min: 1, max: 5, source: L, description: "Rubric 1–5"}
+    # ---------------------------------------------------------------- K. Voice, sentiment, lexical, standardization
+    - {name: agent_pitch_range_st, type: float, unit: semitones, source: A, depends: [roles], description: "p90 − p10 of AGENT F0 (st re 100 Hz)"}
+    - {name: client_pitch_range_st, type: float, unit: semitones, source: A, depends: [roles], description: "p90 − p10 of CLIENT F0"}
+    - {name: agent_intensity_std_db, type: float, unit: dB, source: A, depends: [roles], description: "Std of AGENT intensity on voiced frames"}
+    - {name: client_escalation, type: float, unit: z per call, source: A, depends: [roles], description: "Slope of per-turn mean z(F0 st)+z(intensity) over normalized time; null if < 4 turns"}
+    - {name: sentiment_start, type: float, unit: P(POS)-P(NEG), source: D, depends: [roles, asr], description: "Mean score of first 3 CLIENT turns >= 3 words"}
+    - {name: sentiment_end, type: float, unit: P(POS)-P(NEG), source: D, depends: [roles, asr], description: "Mean score of last 3 CLIENT turns >= 3 words"}
+    - {name: sentiment_delta, type: float, source: D, depends: [roles, asr], description: "sentiment_end − sentiment_start"}
+    - {name: sentiment_min, type: float, source: D, depends: [roles, asr], description: "Minimum CLIENT turn score"}
+    - {name: agent_questions, type: int, source: D, depends: [roles, asr], description: "AGENT sentences ending in ?"}
+    - {name: politeness_markers, type: int, source: D, depends: [roles, asr], description: "Politeness lexicon hits in AGENT turns"}
+    - {name: lexical_richness_mattr, type: float, source: D, depends: [roles, asr], description: "MATTR (window 50) on AGENT tokens (TTR if < 50 tokens)"}
+    - {name: fillers_per_min, type: float, unit: 1/min, source: D, depends: [roles, asr], description: "Filler lexicon hits per AGENT speech minute (kept only if validated vs WER refs)"}
+    - {name: agent_discourse_similarity, type: float, unit: cosine, source: D, depends: [roles, asr], description: "Mean cosine of AGENT-turn centroid to same-group calls' centroids"}
+    - {name: blindness_guess, type: enum, source: L, allowed: [human, ai, unsure], description: "Annotator's blind guess of agent type (validation only)"}
+
+  turns:
+    - {name: call_id, type: str, nullable: false, source: D, description: "Call ID"}
+    - {name: group, type: enum, allowed: [human, ai], nullable: false, source: D, description: "Agent type"}
+    - {name: turn_id, type: str, nullable: false, source: D, description: "Turn ID within call (canonical)"}
+    - {name: role, type: enum, nullable: false, allowed: [AGENT, CLIENT, THIRD_PARTY, SYSTEM, UNKNOWN], source: D, depends: [roles], description: "Role of the speaker"}
+    - {name: start_s, type: float, unit: s, nullable: false, source: D, description: "Turn start (file time)"}
+    - {name: end_s, type: float, unit: s, nullable: false, source: D, description: "Turn end (file time)"}
+    - {name: duration_s, type: float, unit: s, nullable: false, source: D, description: "end_s − start_s"}
+    - {name: n_words, type: int, nullable: false, source: D, depends: [asr], description: "Words in the turn"}
+    - {name: is_interruption, type: bool, nullable: false, source: D, depends: [roles], description: "Turn starts as an interruption"}
+    - {name: latency_s, type: float, unit: s, source: D, depends: [roles], description: "Floor-transfer latency (null with overlap / first turn / same role)"}
+    - {name: n_backchannels_received, type: int, nullable: false, source: D, depends: [roles], description: "Backchannels by others inside the turn"}
+    - {name: asr_confidence, type: float, source: D, depends: [asr], description: "Duration-weighted mean word probability in the turn"}
+    - {name: sentiment, type: float, source: D, depends: [roles, asr], description: "P(POS) − P(NEG); CLIENT turns with >= 3 words only"}
+    - {name: contains_censor, type: bool, nullable: false, source: A, description: "A censor span is inside the turn"}
+
+  objections:
+    - {name: call_id, type: str, nullable: false, source: D, description: "Call ID"}
+    - {name: group, type: enum, allowed: [human, ai], nullable: false, source: D, description: "Agent type"}
+    - {name: objection_idx, type: int, nullable: false, source: D, description: "1-based index within call"}
+    - {name: turn_id, type: str, nullable: false, source: L, description: "Turn where the objection is raised"}
+    - {name: time_s, type: float, unit: s, source: D over L, description: "Turn start − conv_start"}
+    - {name: type, type: enum, nullable: false, source: L, allowed: [no_money, already_paid, call_later, doesnt_recognize_debt, wrong_amount, wants_discount, distrust_who_is_calling, annoyed_by_calls, asks_for_human, other], validate_with: {gold: objection_types, metric: f1}, description: "Objection type"}
+    - {name: agent_technique, type: enum, nullable: false, source: L, allowed: [empathy_validation, clarification, alternative_offer, consequences, reschedule, ignores_repeats_script, escalates], description: "Agent's response technique"}
+    - {name: response_turn_id, type: str, source: L, description: "Agent turn responding to the objection"}
+    - {name: resolved, type: enum, nullable: false, source: L, allowed: ["yes", partial, "no"], description: "yes = client moves forward; partial = acknowledged but hesitant; no = persists / call ends on it"}
+
+  offers:
+    - {name: call_id, type: str, nullable: false, source: D, description: "Call ID"}
+    - {name: group, type: enum, allowed: [human, ai], nullable: false, source: D, description: "Agent type"}
+    - {name: offer_idx, type: int, nullable: false, source: D, description: "1-based index within call"}
+    - {name: turn_id, type: str, nullable: false, source: L, description: "Turn of the offer"}
+    - {name: time_s, type: float, unit: s, source: D over L, description: "Turn start − conv_start"}
+    - {name: proposed_by, type: enum, nullable: false, source: L, allowed: [agent, client], description: "Who proposes"}
+    - {name: type, type: enum, nullable: false, source: L, allowed: [full_payment, minimum_installment, partial_payment, refinancing_restructuring, discount_forgiveness, extra_time], description: "Offer type"}
+    - {name: amount, type: float, unit: COP, source: L, description: "Amount (null if none or censored)"}
+    - {name: amount_censored, type: bool, nullable: false, source: L, description: "Amount mentioned but censored"}
+    - {name: date_text, type: str, source: L, description: "Date as stated (\"censored\" if censored)"}

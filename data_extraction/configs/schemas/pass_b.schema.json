@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pass_b.schema.json",
+  "title": "E9 pass B — anchored 1–5 rubric for one call",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["_meta", "scores"],
+  "properties": {
+    "_meta": {"$ref": "roles.schema.json#/$defs/meta"},
+    "flags": {"type": "array", "uniqueItems": true, "items": {"enum": ["quote_verification_failed"]}},
+    "scores": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["clarity", "empathy", "active_listening", "objection_handling", "control_focus", "professionalism"],
+      "properties": {
+        "clarity": {"$ref": "#/$defs/score"},
+        "empathy": {"$ref": "#/$defs/score"},
+        "active_listening": {"$ref": "#/$defs/score"},
+        "objection_handling": {"$ref": "#/$defs/score"},
+        "control_focus": {"$ref": "#/$defs/score"},
+        "professionalism": {"$ref": "#/$defs/score"}
+      }
+    }
+  },
+  "$defs": {
+    "score": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["score", "justification", "turn_ids"],
+      "properties": {
+        "score": {"oneOf": [{"type": "integer", "minimum": 1, "maximum": 5}, {"const": "NA"}]},
+        "justification": {"type": "string", "minLength": 3, "maxLength": 300},
+        "turn_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^T[0-9]{3,4}$"}}
+      }
+    }
+  }
+}

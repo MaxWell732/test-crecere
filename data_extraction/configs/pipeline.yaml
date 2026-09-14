@@ -1,0 +1,143 @@
+# Pipeline parameters. Operational definitions & thresholds live here.
+# NEVER change silently: any change -> bump `version`, log in docs/decisions.md,
+# re-run affected stages (stage caches are keyed on a hash of the relevant sections).
+version: 8   # v2: censor = 1 kHz beep (D-016) · v3: E5 sentence smoothing (D-021) + full-call role inputs (D-022) · v4: per-call diarization overrides (D-023) · v5: codebook v2 (D-025) · v6: minimum rows for reliability decisions (D-028) · v7: variables removed from calls, codebook v3 (D-029) · v8: publication cleanup, no Drive ids, raw_source ../data/raw (D-030)
+seed: 20260912
+
+paths:
+  # Read-only location of the provider's audio. Nothing is ever written there.
+  raw_source: ../data/raw
+  raw_groups:            # data/raw/<key> <- raw_source/<folder>; key -> group label
+    humanos: {folder: audios_humanos_censurados, group: human}
+    ia:      {folder: audios_ia_censurados,      group: ai}
+  expected_files_per_group: 50
+
+audio:
+  master_sr: 8000
+  model_sr: 16000
+  highpass_hz: 70
+  highpass_order: 2
+  peak_dbfs: -1.0            # model copy only; peak computed outside censor spans
+  clipping_threshold: 0.999  # |x| >= this (full scale = 1.0) counts as clipped
+
+censor:
+  stft_win_ms: 32
+  stft_hop_ms: 10
+  min_zero_run_ms: 50
+  tone_peak_ratio: 0.8
+  tone_min_ms: 150
+  tone_bin_tolerance: 1
+  noise_flatness: 0.5
+  noise_min_ms: 150
+  merge_gap_ms: 20           # candidate runs of the same type closer than this are merged before the min-duration test
+  # implementation parameters (not in spec §7; see docs/decisions.md D-004)
+  energy_floor_dbfs: -60     # frames quieter than this are never tone/noise candidates
+  tone_min_freq_hz: 100      # spectral peak search starts here (ignores DC / mains hum)
+  noise_smooth_frames: 5     # flatness computed on a 5-frame moving-average spectrum (raw periodogram of white noise ~0.56)
+  mixed_min_share: 0.2       # unused since D-029 (censor_type removed); kept so the E0 cache key, and every stage downstream, stays valid
+  # v2 (D-016): E0 on all 100 files found the censoring method = digital 1000 Hz sine beep (freq std 0.00 Hz,
+  # amplitude CV 0.000, H2 −106 dB). Other "tone" candidates were voiced speech; zero runs were not beep-adjacent.
+  active_types: [tone]       # only these types count as censored; zeros/noise/other tones kept as diagnostics
+  tone_freq_hz: [1000]       # allowed censor-beep centre frequencies
+  tone_freq_tolerance_hz: 50
+  tone_max_freq_std_hz: 3.0  # synthetic tone: interpolated peak frequency std within the span
+
+vad:
+  threshold: 0.5
+  min_speech_ms: 250
+  min_silence_ms: 300
+  speech_pad_ms: 100
+  frame_ms: 32               # frame size used for SNR / level computation
+
+asr:
+  model: large-v3
+  fallback_model: large-v3-turbo
+  device: cuda
+  compute_type: int8
+  cpu_threads: 8
+  language: es
+  beam_size: 5
+  word_timestamps: true
+  vad_filter: true
+  condition_on_previous_text: false
+  compression_ratio_threshold: 2.4
+  log_prob_threshold: -1.0
+  no_speech_threshold: 0.6
+  initial_prompt: "Buenos días, le hablo del área de cartera sobre su obligación en mora. Eh, sí, señor, la cuota vencida, el acuerdo de pago, pues, por PSE, Efecty o Nequi. Ajá, listo, centrales de riesgo."
+  low_conf_word_prob: 0.5
+  nonspeech_drop_fraction: 0.8   # drop segment if > this share of its word time is VAD-nonspeech/censor
+  ngram_collapse_n: 3
+  ngram_collapse_repeats: 3
+
+diarization:
+  pipeline: pyannote/speaker-diarization-community-1
+  fallback_pipeline: pyannote/speaker-diarization-3.1
+  device: cuda
+  min_speakers: 1
+  max_speakers: 3
+
+turns:
+  backchannel_max_s: 1.0
+  backchannel_max_words: 2
+  interruption_min_overlap_s: 0.5
+  word_to_segment_max_gap_s: 0.5
+  backchannel_requires_overlap: false   # false = literal §9-E5 (short unit anywhere inside the floor holder's turn); D-009
+  # v3 (D-021): sentence-level smoothing of word→speaker assignment (diarization boundaries lag ~1 s in smoke test)
+  sentence_smoothing: true
+  smoothing_max_run_s: 1.5       # a minority-speaker run inside a sentence is reassigned only if this short…
+  smoothing_max_share: 0.4       # …and at most this share of the sentence's words
+  smoothing_min_words: 4         # sentences shorter than this are never smoothed
+  smoothing_max_word_gap_s: 1.0  # a pause longer than this also ends a "sentence"
+
+features:
+  dead_air_min_s: 3.0
+  monologue_min_s: 30
+  mechanical_repetition_ratio: 80
+  mechanical_repetition_min_words: 5
+  sentiment_edge_turns: 3
+  sentiment_min_words: 3
+  sentiment_model: pysentimiento/robertuito-sentiment-analysis   # pysentimiento `sentiment`, lang es
+  embedding_model: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
+  mattr_window: 50
+  repeat_request_alo_after_s: 10
+  escalation_min_turn_s: 1.0
+  escalation_min_turns: 4
+
+prosody:
+  f0_floor_hz: 75
+  f0_ceiling_hz: 500
+  st_ref_hz: 100
+  min_segment_s: 0.5
+
+annotation:
+  quote_match_min: 90
+  batch_size: 10
+  roles_context_s: 90
+  roles_context_turns: 20
+  roles_render_full_call: true   # v3 (D-022): append all remaining turns so suspect turns can be flagged anywhere
+
+validation:
+  gold_per_group: 10
+  dev_per_group: 3
+  wer_per_group: 2
+  kappa_keep: 0.6
+  kappa_flag: 0.4
+  exact_match_keep: 0.8
+  group_gap_flag: 0.2          # |metric_human - metric_ai| above this = "marked gap" (annotation metrics)
+  # implementation parameters (not in spec §7; see docs/decisions.md D-013)
+  exact_match_flag: 0.6        # exact match: >= exact_match_keep keep, >= this flag, else drop
+  wer_gap_flag: 0.05           # |WER_human - WER_ai| above this -> ASR-dependent D variables inherit `flag`
+  role_accuracy_gap_flag: 0.05 # |role_acc_human - role_acc_ai| above this -> role-dependent D variables inherit `flag`
+  filler_ratio_keep: [0.8, 1.25]  # fillers_per_min kept only if hyp/ref filler count ratio (WER refs) is inside
+  filler_min_ref_count: 5
+  min_rows_decision: 10        # agreement metrics on fewer paired rows than this cannot decide keep/drop -> flag (D-028)
+
+quality:
+  low_snr_db: 10
+  high_clipping_pct: 1.0
+  low_asr_conf: 0.6
+  no_speech_ratio: 0.05
+  censor_heavy_pct: 20
+
+tables:
+  keep_dropped: false          # false: remove dropped variables from `calls` (kept in dictionary)

@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pass_a.schema.json",
+  "title": "E9 pass A — factual/interpretive annotation of one call",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["_meta", "contact", "debt_context", "outcome", "negotiation", "objections", "compliance", "milestones", "failures", "blindness"],
+  "properties": {
+    "_meta": {"$ref": "roles.schema.json#/$defs/meta"},
+    "flags": {"type": "array", "uniqueItems": true, "items": {"enum": ["quote_verification_failed"]}},
+    "contact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contact_type", "identity_validated", "evidence"],
+      "properties": {
+        "contact_type": {"enum": ["no_answer", "voicemail", "ivr", "wrong_number", "hangup_before_identification", "third_party", "account_holder", "unclear"]},
+        "identity_validated": {"$ref": "#/$defs/bool_na"},
+        "evidence": {"$ref": "#/$defs/evidence"}
+      }
+    },
+    "debt_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["product", "debt_amount", "overdue_amount", "non_payment_reasons", "evidence"],
+      "properties": {
+        "product": {"enum": ["credit_card", "personal_loan", "vehicle_loan", "mortgage", "payroll_loan", "microcredit", "telecom_services", "other", "unknown"]},
+        "debt_amount": {"$ref": "#/$defs/amount"},
+        "overdue_amount": {"$ref": "#/$defs/amount"},
+        "non_payment_reasons": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/reason"}},
+        "evidence": {"$ref": "#/$defs/evidence"}
+      }
+    },
+    "outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["final_outcome", "ptp", "ptp_type_commitment", "ptp_amount", "ptp_date", "ptp_type", "ptp_confirmed_by_client", "agent_recapped", "callback_scheduled", "evidence"],
+      "properties": {
+        "final_outcome": {"enum": ["no_contact", "third_party", "holder_refuses", "no_agreement", "callback_scheduled", "claims_already_paid", "vague_promise", "firm_promise"]},
+        "ptp": {"type": "boolean"},
+        "ptp_type_commitment": {"enum": ["firm", "vague", "na"]},
+        "ptp_amount": {"$ref": "#/$defs/amount"},
+        "ptp_date": {"oneOf": [{"type": "string", "minLength": 1}, {"type": "null"}]},
+        "ptp_type": {"enum": ["full", "partial", null]},
+        "ptp_confirmed_by_client": {"$ref": "#/$defs/bool_na"},
+        "agent_recapped": {"$ref": "#/$defs/bool_na"},
+        "callback_scheduled": {"type": "boolean"},
+        "evidence": {"$ref": "#/$defs/evidence"}
+      }
+    },
+    "negotiation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["had_negotiation", "first_anchor", "offers"],
+      "properties": {
+        "had_negotiation": {"type": "boolean"},
+        "first_anchor": {"enum": ["agent", "client", "none"]},
+        "offers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["turn_id", "proposed_by", "type", "amount", "date_text", "quote"],
+            "properties": {
+              "turn_id": {"$ref": "#/$defs/turn_id"},
+              "proposed_by": {"enum": ["agent", "client"]},
+              "type": {"enum": ["full_payment", "minimum_installment", "partial_payment", "refinancing_restructuring", "discount_forgiveness", "extra_time"]},
+              "amount": {"$ref": "#/$defs/amount"},
+              "date_text": {"oneOf": [{"type": "string", "minLength": 1}, {"type": "null"}]},
+              "quote": {"$ref": "#/$defs/quote"}
+            }
+          }
+        }
+      }
+    },
+    "objections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["turn_id", "type", "quote", "response_turn_id", "agent_technique", "resolved"],
+        "properties": {
+          "turn_id": {"$ref": "#/$defs/turn_id"},
+          "type": {"enum": ["no_money", "already_paid", "call_later", "doesnt_recognize_debt", "wrong_amount", "wants_discount", "distrust_who_is_calling", "annoyed_by_calls", "asks_for_human", "other"]},
+          "quote": {"$ref": "#/$defs/quote"},
+          "response_turn_id": {"oneOf": [{"$ref": "#/$defs/turn_id"}, {"type": "null"}]},
+          "agent_technique": {"enum": ["empathy_validation", "clarification", "alternative_offer", "consequences", "reschedule", "ignores_repeats_script", "escalates"]},
+          "resolved": {"enum": ["yes", "partial", "no"]}
+        }
+      }
+    },
+    "compliance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["greets", "identifies_self", "recording_notice", "validates_identity_before_disclosing", "states_amount", "states_due_date", "offers_payment_channels", "mentions_credit_bureaus", "recaps_agreement", "polite_closing", "debt_disclosed_to_third_party", "coercive_language"],
+      "properties": {
+        "greets": {"$ref": "#/$defs/item"},
+        "identifies_self": {"$ref": "#/$defs/item"},
+        "recording_notice": {"$ref": "#/$defs/item"},
+        "validates_identity_before_disclosing": {"$ref": "#/$defs/item"},
+        "states_amount": {"$ref": "#/$defs/item"},
+        "states_due_date": {"$ref": "#/$defs/item"},
+        "offers_payment_channels": {"$ref": "#/$defs/item"},
+        "mentions_credit_bureaus": {"$ref": "#/$defs/item"},
+        "recaps_agreement": {"$ref": "#/$defs/item"},
+        "polite_closing": {"$ref": "#/$defs/item"},
+        "debt_disclosed_to_third_party": {"$ref": "#/$defs/item"},
+        "coercive_language": {"$ref": "#/$defs/item"}
+      }
+    },
+    "milestones": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["identification_turn_id", "debt_mention_turn_id", "first_offer_turn_id", "ptp_turn_id"],
+      "properties": {
+        "identification_turn_id": {"$ref": "#/$defs/turn_id_null"},
+        "debt_mention_turn_id": {"$ref": "#/$defs/turn_id_null"},
+        "first_offer_turn_id": {"$ref": "#/$defs/turn_id_null"},
+        "ptp_turn_id": {"$ref": "#/$defs/turn_id_null"}
+      }
+    },
+    "failures": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["agent_misunderstood_turn_ids", "incoherent_response_turn_ids", "client_expresses_annoyance", "closing_by"],
+      "properties": {
+        "agent_misunderstood_turn_ids": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/turn_id"}},
+        "incoherent_response_turn_ids": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/turn_id"}},
+        "client_expresses_annoyance": {"$ref": "#/$defs/flag"},
+        "closing_by": {"enum": ["agent", "client_hangup", "cut_unclear"]}
+      }
+    },
+    "blindness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["guess_agent_type", "reason"],
+      "properties": {
+        "guess_agent_type": {"enum": ["human", "ai", "unsure"]},
+        "reason": {"type": "string", "minLength": 3, "maxLength": 400}
+      }
+    }
+  },
+  "$defs": {
+    "turn_id": {"type": "string", "pattern": "^T[0-9]{3,4}$"},
+    "turn_id_null": {"oneOf": [{"type": "string", "pattern": "^T[0-9]{3,4}$"}, {"type": "null"}]},
+    "quote": {"type": "string", "minLength": 2, "maxLength": 400},
+    "bool_na": {"oneOf": [{"type": "boolean"}, {"const": "na"}]},
+    "amount": {"oneOf": [{"type": "number", "minimum": 0}, {"type": "null"}, {"const": "censored"}]},
+    "reason": {"enum": ["unemployment_income_loss", "forgot", "illness_calamity", "over_indebtedness", "disputes_charge", "doesnt_recognize_debt_fraud", "already_paid", "payment_channel_problem", "other", "not_stated"]},
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["turn_id", "quote"],
+        "properties": {"turn_id": {"$ref": "#/$defs/turn_id"}, "quote": {"$ref": "#/$defs/quote"}}
+      }
+    },
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "turn_id", "quote"],
+      "properties": {
+        "value": {"oneOf": [{"type": "boolean"}, {"const": "na"}]},
+        "turn_id": {"$ref": "#/$defs/turn_id_null"},
+        "quote": {"oneOf": [{"$ref": "#/$defs/quote"}, {"type": "null"}]}
+      }
+    },
+    "flag": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "turn_id", "quote"],
+      "properties": {
+        "value": {"type": "boolean"},
+        "turn_id": {"$ref": "#/$defs/turn_id_null"},
+        "quote": {"oneOf": [{"$ref": "#/$defs/quote"}, {"type": "null"}]}
+      }
+    }
+  }
+}

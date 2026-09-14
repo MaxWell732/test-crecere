@@ -1,0 +1,13 @@
+# Data never tracked (spec §1.3, §6)
+data/
+*.wav
+*.parquet
+.env
+
+# Environment, caches, model downloads (all confined to this directory)
+.venv/
+.cache/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/

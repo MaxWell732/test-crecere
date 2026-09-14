@@ -1,0 +1,26 @@
+# Environments and caches
+.venv/
+**/.cache/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Secrets (never tracked)
+.env
+.env.*
+**/huggingface/token
+**/huggingface/stored_tokens
+
+# Data: only the anonymous tables in data/cleaned/ are published
+data/raw/
+data/interim/
+data/audios_*/
+data_extraction/data/
+*.wav
+
+# OS, editors, logs
+.DS_Store
+.~lock.*#
+*.log

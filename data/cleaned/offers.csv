@@ -1,0 +1,168 @@
+call_id,group,offer_idx,turn_id,time_s,proposed_by,type,amount,amount_censored,date_text
+C002,ai,1,T014,172.885,agent,discount_forgiveness,630000.0,False,
+C002,ai,2,T023,289.356,client,partial_payment,300000.0,False,
+C002,ai,3,T030,341.179,agent,refinancing_restructuring,,False,
+C003,human,1,T007,44.913,client,extra_time,,False,fin del mes
+C003,human,2,T008,47.984,agent,partial_payment,,False,el 15 de agosto
+C003,human,3,T012,86.341,agent,extra_time,,False,30 de agosto
+C004,human,1,T004,33.21,client,extra_time,,False,el otro mes
+C004,human,2,T005,43.554,agent,partial_payment,,False,este mes
+C004,human,3,T009,95.191,agent,refinancing_restructuring,133300.0,False,
+C004,human,4,T012,127.068,client,extra_time,,False,los 5
+C007,ai,1,T005,8.404,agent,discount_forgiveness,1760000.0,False,
+C008,human,1,T014,99.154,agent,full_payment,110000.0,False,el día de mañana 4 de agosto
+C010,human,1,T003,61.951,agent,extra_time,,False,entre hoy y el lunes
+C011,ai,1,T007,65.593,agent,discount_forgiveness,380000.0,False,
+C011,ai,2,T011,135.388,agent,full_payment,380000.0,False,antes del 31 de julio
+C011,ai,3,T011,135.388,agent,minimum_installment,190000.0,False,
+C012,ai,1,T005,26.293,agent,discount_forgiveness,810000.0,False,
+C012,ai,2,T005,26.293,agent,full_payment,810000.0,False,
+C013,human,1,T003,21.741,agent,minimum_installment,457000.0,False,
+C014,human,1,T009,47.535,agent,full_payment,672584.0,False,
+C014,human,2,T009,47.535,agent,minimum_installment,,False,
+C014,human,3,T013,93.654,agent,full_payment,672584.0,False,viernes 21 de agosto
+C015,human,1,T002,0.302,agent,refinancing_restructuring,102000.0,False,
+C017,human,1,T005,51.095,client,extra_time,,False,"mañana, si no la otra semana"
+C017,human,2,T008,75.834,agent,partial_payment,,False,este mes
+C018,ai,1,T010,48.462,agent,discount_forgiveness,,False,
+C018,ai,2,T016,91.749,agent,full_payment,4310000.0,False,4 de agosto de 2026
+C019,human,1,T010,88.007,agent,extra_time,,False,30 de junio
+C020,human,1,T005,34.088,client,extra_time,,False,15 de julio
+C021,ai,1,T003,9.687,agent,discount_forgiveness,4960000.0,False,
+C021,ai,2,T007,101.352,agent,full_payment,4960000.0,False,antes del 25 de julio
+C023,human,1,T005,46.503,client,extra_time,,False,el 20 del otro mes
+C026,ai,1,T004,31.657,agent,discount_forgiveness,4350000.0,False,
+C026,ai,2,T006,141.48,agent,minimum_installment,2180000.0,False,
+C026,ai,3,T009,169.053,client,extra_time,,False,15 de agosto
+C026,ai,4,T012,197.408,agent,extra_time,,False,31 de julio
+C026,ai,5,T014,222.729,agent,partial_payment,,False,antes del 31 de julio
+C026,ai,6,T015,249.21,client,minimum_installment,1500000.0,False,
+C026,ai,7,T016,288.549,agent,refinancing_restructuring,,False,
+C026,ai,8,T019,363.875,client,minimum_installment,400000.0,False,
+C027,human,1,T011,75.07,agent,full_payment,60000.0,False,el día de hoy
+C027,human,2,T014,98.29,client,extra_time,,False,el 30
+C028,ai,1,T001,0.0,agent,discount_forgiveness,9730000.0,False,
+C028,ai,2,T003,73.98,agent,minimum_installment,4870000.0,False,
+C029,ai,1,T010,61.223,agent,discount_forgiveness,1970000.0,False,
+C029,ai,2,T013,133.161,client,discount_forgiveness,1000000.0,False,
+C029,ai,3,T015,192.493,client,minimum_installment,,False,
+C029,ai,4,T018,268.245,agent,refinancing_restructuring,,False,
+C030,ai,1,T010,36.771,agent,discount_forgiveness,2560000.0,False,
+C037,ai,1,T017,172.412,agent,discount_forgiveness,13040000.0,False,antes del 31 de agosto de 2026
+C038,human,1,T033,298.469,agent,minimum_installment,200000.0,False,
+C040,ai,1,T012,111.662,agent,discount_forgiveness,2110000.0,False,
+C040,ai,2,T021,245.615,client,extra_time,,False,después de 30
+C042,human,1,T004,10.702,agent,full_payment,340000.0,False,31 de julio
+C043,ai,1,T008,58.488,agent,discount_forgiveness,2500000.0,False,
+C043,ai,2,T012,134.679,agent,minimum_installment,1250000.0,False,26 de julio
+C043,ai,3,T016,238.528,agent,refinancing_restructuring,,False,
+C043,ai,4,T017,261.495,client,minimum_installment,250000.0,False,
+C043,ai,5,T021,299.788,client,extra_time,,False,hasta el 31
+C044,human,1,T005,43.993,client,extra_time,,False,finales de mes
+C046,human,1,T001,0.0,agent,discount_forgiveness,10000000.0,False,
+C047,human,1,T007,49.866,agent,minimum_installment,632000.0,False,
+C047,human,2,T012,122.783,client,minimum_installment,200000.0,False,
+C047,human,3,T015,141.227,agent,minimum_installment,350000.0,False,
+C047,human,4,T016,164.802,client,extra_time,,False,primeros días del mes
+C048,ai,1,T010,75.145,agent,discount_forgiveness,980000.0,False,
+C048,ai,2,T010,75.145,agent,full_payment,980000.0,False,antes del 31 de agosto
+C048,ai,3,T010,75.145,agent,minimum_installment,490000.0,False,antes del 31 de agosto
+C048,ai,4,T010,75.145,agent,minimum_installment,330000.0,False,antes del 31 de agosto
+C049,human,1,T006,36.794,agent,full_payment,837000.0,False,
+C049,human,2,T008,54.226,agent,minimum_installment,,False,
+C049,human,3,T017,139.512,client,discount_forgiveness,650000.0,False,
+C049,human,4,T020,174.528,agent,partial_payment,650000.0,False,el restante para el mes de agosto
+C049,human,5,T022,228.325,agent,minimum_installment,418500.0,False,
+C049,human,6,T024,272.302,agent,minimum_installment,280000.0,False,
+C050,human,1,T005,10.084,agent,discount_forgiveness,,False,
+C050,human,2,T005,10.084,agent,minimum_installment,1504000.0,False,
+C050,human,3,T009,111.013,agent,refinancing_restructuring,251000.0,False,
+C051,ai,1,T011,132.25,agent,discount_forgiveness,650000.0,False,a más tardar el 11 de junio de 2026
+C052,ai,1,T014,156.612,agent,discount_forgiveness,970000.0,False,
+C052,ai,2,T014,156.612,agent,minimum_installment,490000.0,False,
+C052,ai,3,T018,214.879,agent,extra_time,,False,hasta el 5 de junio
+C052,ai,4,T020,239.046,agent,minimum_installment,490000.0,False,30 de junio
+C053,ai,1,T005,22.764,agent,discount_forgiveness,9290000.0,False,
+C054,ai,1,T011,82.141,agent,discount_forgiveness,6590000.0,False,
+C054,ai,2,T011,82.141,agent,minimum_installment,1320000.0,False,
+C054,ai,3,T017,219.368,agent,refinancing_restructuring,,False,
+C056,human,1,T018,201.386,agent,extra_time,,False,martes 18 de agosto
+C056,human,2,T029,428.119,client,full_payment,700000.0,False,
+C056,human,3,T031,472.585,client,minimum_installment,350000.0,False,una ahorita el 15 y la otra el 30
+C056,human,4,T034,486.473,agent,full_payment,700000.0,False,
+C057,human,1,T010,64.49,agent,discount_forgiveness,11000000.0,False,
+C058,human,1,T008,56.91,agent,full_payment,,False,
+C065,ai,1,T005,21.574,agent,discount_forgiveness,560000.0,False,
+C066,human,1,T004,23.2,agent,minimum_installment,,False,
+C067,ai,1,T005,83.717,agent,discount_forgiveness,,False,
+C068,ai,1,T001,0.0,agent,discount_forgiveness,60000.0,False,
+C068,ai,2,T001,0.0,agent,full_payment,60000.0,False,antes del 13 de agosto
+C069,ai,1,T001,0.0,agent,discount_forgiveness,800000.0,False,
+C069,ai,2,T001,0.0,agent,full_payment,400000.0,False,
+C070,ai,1,T003,24.857,agent,discount_forgiveness,13900000.0,False,
+C070,ai,2,T007,152.808,agent,full_payment,13900000.0,False,antes del 30 de junio
+C070,ai,3,T009,221.148,agent,refinancing_restructuring,,False,
+C070,ai,4,T018,360.883,client,minimum_installment,,False,
+C070,ai,5,T027,433.924,agent,minimum_installment,500000.0,False,
+C071,human,1,T014,88.932,agent,full_payment,943000.0,False,
+C071,human,2,T028,537.537,agent,discount_forgiveness,404000.0,False,
+C071,human,3,T030,578.459,agent,minimum_installment,270000.0,False,
+C071,human,4,T035,676.142,client,minimum_installment,,False,dos meses
+C071,human,5,T037,695.335,client,partial_payment,400000.0,False,el viernes
+C071,human,6,T046,796.264,agent,discount_forgiveness,382000.0,False,
+C071,human,7,T057,974.751,client,discount_forgiveness,1200000.0,False,
+C071,human,8,T059,989.196,client,full_payment,1100000.0,False,15 de agosto
+C073,ai,1,T005,11.951,agent,discount_forgiveness,830000.0,False,
+C073,ai,2,T005,11.951,agent,minimum_installment,60000.0,False,
+C073,ai,3,T010,107.561,client,extra_time,,False,el 5
+C076,human,1,T005,24.645,agent,discount_forgiveness,15697000.0,False,
+C076,human,2,T008,75.236,client,refinancing_restructuring,8000000.0,False,
+C076,human,3,T017,137.859,agent,refinancing_restructuring,,False,
+C077,ai,1,T021,188.889,agent,discount_forgiveness,830000.0,False,
+C077,ai,2,T025,223.34,agent,full_payment,830000.0,False,
+C077,ai,3,T025,223.34,agent,minimum_installment,420000.0,False,
+C077,ai,4,T026,237.819,client,minimum_installment,,False,
+C077,ai,5,T038,332.403,client,extra_time,,False,el viernes
+C078,human,1,T013,68.654,client,extra_time,,False,mañana a las horas de la mañana
+C080,human,1,T001,0.0,agent,full_payment,1400000.0,False,el día de hoy
+C080,human,2,T005,44.648,agent,discount_forgiveness,480000.0,False,a más tardar el día de mañana
+C082,ai,1,T020,170.538,agent,discount_forgiveness,1540000.0,False,
+C082,ai,2,T020,170.538,agent,minimum_installment,770000.0,False,
+C085,ai,1,T001,0.0,agent,discount_forgiveness,1550000.0,False,
+C085,ai,2,T001,0.0,agent,minimum_installment,780000.0,False,
+C086,human,1,T009,79.903,client,extra_time,,False,el sábado
+C087,ai,1,T001,0.0,agent,discount_forgiveness,540000.0,False,
+C087,ai,2,T001,0.0,agent,full_payment,540000.0,False,21 de agosto de 2026
+C088,human,1,T005,17.015,agent,discount_forgiveness,1050000.0,False,
+C088,human,2,T007,59.945,agent,minimum_installment,410000.0,False,
+C088,human,3,T010,107.33,client,minimum_installment,,False,
+C088,human,4,T012,121.927,client,minimum_installment,100000.0,False,
+C088,human,5,T013,131.951,agent,minimum_installment,200000.0,False,
+C089,ai,1,T007,36.163,agent,discount_forgiveness,740000.0,False,
+C089,ai,2,T011,106.785,agent,full_payment,740000.0,False,
+C090,human,1,T003,21.646,agent,discount_forgiveness,680000.0,False,
+C090,human,2,T011,132.549,agent,full_payment,680000.0,False,15 de julio
+C092,human,1,T003,72.615,agent,extra_time,,False,10 de julio
+C093,human,1,T003,20.099,agent,minimum_installment,,False,
+C093,human,2,T007,47.538,agent,minimum_installment,285627.0,False,el 15
+C093,human,3,T008,57.325,client,extra_time,,False,el 30
+C094,human,1,T006,17.803,agent,discount_forgiveness,1278000.0,False,
+C094,human,2,T006,17.803,agent,minimum_installment,640000.0,False,julio y agosto
+C094,human,3,T011,95.023,client,extra_time,,False,el 17 y el 15 de agosto
+C095,ai,1,T001,0.0,agent,discount_forgiveness,4820000.0,False,
+C095,ai,2,T001,0.0,agent,minimum_installment,1610000.0,False,
+C096,human,1,T005,99.489,agent,discount_forgiveness,1000000.0,False,
+C096,human,2,T005,99.489,agent,discount_forgiveness,24000000.0,False,
+C096,human,3,T010,286.4,client,minimum_installment,400000.0,False,
+C096,human,4,T013,345.375,agent,minimum_installment,320000.0,False,
+C096,human,5,T018,510.412,client,extra_time,,False,para el 20
+C097,human,1,T006,48.718,agent,discount_forgiveness,1570000.0,False,
+C098,human,1,T013,88.831,agent,extra_time,,False,15 de agosto
+C099,ai,1,T007,100.45,agent,discount_forgiveness,72560000.0,False,
+C099,ai,2,T007,100.45,agent,minimum_installment,4840000.0,False,
+C099,ai,3,T013,208.147,agent,refinancing_restructuring,,False,
+C099,ai,4,T014,240.445,client,minimum_installment,2500000.0,False,
+C100,ai,1,T004,62.134,agent,discount_forgiveness,11650000.0,False,
+C100,ai,2,T014,249.936,agent,full_payment,11650000.0,False,antes del 26 de julio
+C100,ai,3,T016,265.664,agent,refinancing_restructuring,,False,
+C100,ai,4,T017,299.616,client,minimum_installment,50000.0,False,

@@ -1,0 +1,143 @@
+variable,table,description,type,allowed_values,unit,source,reliability_decision
+call_id,calls,Anonymous call ID (C001…C100),str,,,D,keep
+group,calls,"Agent type, from subfolder; joined in E11",enum,human;ai,,D,keep
+duration_file_s,calls,File length,float,,s,D,keep
+snr_db,calls,"10·log10(mean speech-frame power / mean non-speech-frame power), censor and exact zeros excluded",float,,dB,A,keep
+clipping_pct,calls,% samples at >= 0.999 full scale,float,,%,A,keep
+level_dbfs,calls,RMS level of speech frames,float,,dBFS,A,keep
+speech_ratio,calls,Speech seconds / (duration − censored_s),float,,fraction,A,keep
+censored_s,calls,Seconds detected as censored (E0),float,,s,A,keep
+n_censor_segments,calls,Number of censor spans (E0),int,,,A,keep
+asr_confidence,calls,Duration-weighted mean word probability,float,,probability,D,keep
+asr_low_conf_pct,calls,% words with probability < 0.5,float,,%,D,keep
+n_speakers_detected,calls,Distinct diarization speakers,int,,,D,keep
+flags,calls,Quality warnings,list,low_snr;high_clipping;low_asr_conf;no_speech;censor_heavy;one_speaker;three_speakers;hallucination_removed;roles_manual_fix;diar_corrected;quote_verification_failed;agent_spoke_first;annotation_missing;stereo_downmixed,,D,keep
+contact_type,calls,Who/what was reached,enum,no_answer;voicemail;ivr;wrong_number;hangup_before_identification;third_party;account_holder;unclear,,L,flag
+identity_validated,calls,Agent explicitly confirms the account holder (name or ID) at any point,tri,true;false;na,,L,flag
+product,calls,Type of debt,enum,credit_card;personal_loan;vehicle_loan;mortgage;payroll_loan;microcredit;telecom_services;other;unknown,,L,flag
+debt_amount,calls,Total debt amount stated (null if not stated or censored),float,,COP,L,flag
+overdue_amount,calls,Overdue amount stated (null if not stated or censored),float,,COP,L,flag
+non_payment_reasons,calls,"All reasons for non-payment stated, primary (the one the client stresses most) first; not_stated if none; empty only if annotation missing",list,unemployment_income_loss;forgot;illness_calamity;over_indebtedness;disputes_charge;doesnt_recognize_debt_fraud;already_paid;payment_channel_problem;other;not_stated,,L,flag
+final_outcome,calls,Ordinal outcome 0 no_contact … 7 firm_promise,enum,no_contact;third_party;holder_refuses;no_agreement;callback_scheduled;claims_already_paid;vague_promise;firm_promise,,L,flag
+final_outcome_rank,calls,Ordinal rank of final_outcome (0–7),int,,,D over L,flag
+ptp,calls,Account holder commits to pay (firm or vague),bool,,,L,flag
+ptp_type_commitment,calls,firm = explicit unconditional; vague = conditional/uncertain,enum,firm;vague;na,,L,flag
+ptp_amount,calls,Amount promised (null if not stated or censored),float,,COP,L,flag
+ptp_date,calls,"Promise date as stated (""censored"" if censored)",str,,,L,flag
+ptp_type,calls,Promise relative to overdue amount,enum,full;partial,,L,flag
+ptp_confirmed_by_client,calls,Client explicitly confirms final terms,tri,true;false;na,,L,flag
+agent_recapped,calls,Agent restates amount/date/channel before closing,tri,true;false;na,,L,flag
+callback_scheduled,calls,A new contact is agreed,bool,,,L,flag
+ptp_strength,calls,(amount is a number) + (date not null) + confirmed; null if ptp=false,int,,,D over L,flag
+had_negotiation,calls,Any payment option or amount/date discussed,bool,,,L,flag
+n_offers_agent,calls,Offers proposed by the agent,int,,,D over L,flag
+n_counteroffers_client,calls,Offers proposed by the client,int,,,D over L,flag
+first_anchor,calls,Who states the first amount or date proposal,enum,agent;client;none,,L,flag
+n_objections,calls,Rows in objections,int,,,D over L,flag
+n_objections_resolved,calls,Objections with resolved = yes,int,,,D over L,flag
+n_objections_partial,calls,Objections with resolved = partial,int,,,D over L,flag
+pct_objections_resolved,calls,100 · resolved yes / n_objections; null if 0,float,,%,D over L,flag
+conv_duration_s,calls,Last non-SYSTEM speech end − conv_start,float,,s,D,keep
+agent_speech_s,calls,AGENT speech time (overlap counts for both roles; censor excluded),float,,s,D,keep
+client_speech_s,calls,CLIENT speech time,float,,s,D,keep
+agent_talk_share,calls,agent_speech_s / (agent_speech_s + client_speech_s),float,,fraction,D,keep
+silence_pct,calls,Non-speech non-censored time in conversation / (conv_duration − censored),float,,%,D,keep
+n_turns,calls,Non-backchannel non-SYSTEM turns,int,,,D,keep
+turns_per_min,calls,n_turns per conversation minute,float,,1/min,D,keep
+mean_turn_s_agent,calls,Mean AGENT turn duration,float,,s,D,keep
+mean_turn_s_client,calls,Mean CLIENT turn duration,float,,s,D,keep
+max_agent_monologue_s,calls,Longest AGENT turn,float,,s,D,keep
+n_monologues_30s,calls,AGENT turns >= 30 s,int,,,D,keep
+agent_latency_median_s,calls,Median latency over CLIENT→AGENT transfers without overlap,float,,s,D,keep
+agent_latency_p90_s,calls,90th percentile of the same,float,,s,D,keep
+client_latency_median_s,calls,Median latency over AGENT→CLIENT transfers,float,,s,D,keep
+agent_spoke_first,calls,First non-SYSTEM speech is AGENT,bool,,,D,keep
+time_to_first_agent_voice_s,calls,End of client's first utterance → first AGENT turn; null if agent spoke first,float,,s,D,keep
+dead_air_count,calls,Gaps without speech (censor excluded) >= 3 s within the conversation,int,,,D,keep
+dead_air_s,calls,Total duration of those gaps,float,,s,D,keep
+interruptions_per_min_agent,calls,AGENT interrupts CLIENT per conversation minute,float,,1/min,D,keep
+interruptions_per_min_client,calls,CLIENT interrupts AGENT per conversation minute,float,,1/min,D,keep
+overlap_s,calls,Total overlapped speech time,float,,s,D,keep
+yield_time_s,calls,Median over CLIENT interruptions of AGENT: interruption start → end of agent speech,float,,s,D,keep
+backchannels_agent_per_min,calls,AGENT backchannels per minute,float,,1/min,D,keep
+words_per_min_agent,calls,AGENT words per speech minute,float,,words/min,D,keep
+words_per_min_client,calls,CLIENT words per speech minute,float,,words/min,D,keep
+time_to_identification_s,calls,Start of pass-A identification milestone turn − conv_start,float,,s,D over L,flag
+time_to_debt_mention_s,calls,Same for debt mention,float,,s,D over L,flag
+time_to_first_offer_s,calls,Same for first offer,float,,s,D over L,flag
+time_to_ptp_s,calls,Same for promise to pay,float,,s,D over L,flag
+closing_by,calls,Who closes the call (checked against last_turn_role),enum,agent;client_hangup;cut_unclear,,L,flag
+last_turn_role,calls,Role of the last turn (D check for closing_by),enum,AGENT;CLIENT;THIRD_PARTY;SYSTEM;UNKNOWN,,D,keep
+repeat_requests,calls,"Repeat-request lexicon hits, both roles",int,,,D,keep
+repeat_requests_agent,calls,Repeat requests by AGENT,int,,,D,keep
+repeat_requests_client,calls,Repeat requests by CLIENT,int,,,D,keep
+mechanical_repetition,calls,Two AGENT turns >= 5 words with token_set_ratio >= 80,bool,,,D,keep
+agent_misunderstood,calls,AGENT turns showing failure to understand the client,int,,,L,flag
+incoherent_responses,calls,AGENT turns not responding to the preceding client content,int,,,L,drop
+client_expresses_annoyance,calls,Explicit annoyance or anger,bool,,,L,flag
+greets,calls,Opening greeting,tri,true;false;na,,L,flag
+identifies_self,calls,Agent states own name/role and the entity,tri,true;false;na,,L,flag
+recording_notice,calls,Says the call is recorded,tri,true;false;na,,L,flag
+validates_identity_before_disclosing,calls,Identity confirmed before any debt detail,tri,true;false;na,,L,flag
+states_amount,calls,Amount owed or overdue stated,tri,true;false;na,,L,flag
+states_due_date,calls,Due date or days overdue stated,tri,true;false;na,,L,flag
+offers_payment_channels,calls,At least one channel named,tri,true;false;na,,L,flag
+mentions_credit_bureaus,calls,Mentions reporting to credit bureaus,tri,true;false;na,,L,flag
+recaps_agreement,calls,Restates the agreement (na if no ptp),tri,true;false;na,,L,flag
+polite_closing,calls,Courteous goodbye,tri,true;false;na,,L,flag
+script_checklist_score,calls,% true over non-na script items; null unless account_holder,float,,%,D over L,flag
+debt_disclosed_to_third_party,calls,Debt existence/amount revealed to a non-account-holder,tri,true;false;na,,L,flag
+coercive_language,calls,"Threats, intimidation, humiliation",tri,true;false;na,,L,drop
+clarity,calls,Rubric 1–5 (null = NA),int,,,L,flag
+empathy,calls,Rubric 1–5,int,,,L,flag
+active_listening,calls,Rubric 1–5,int,,,L,flag
+objection_handling,calls,"Rubric 1–5 (null = NA, no objections)",int,,,L,flag
+control_focus,calls,Rubric 1–5,int,,,L,flag
+professionalism,calls,Rubric 1–5,int,,,L,flag
+agent_pitch_range_st,calls,p90 − p10 of AGENT F0 (st re 100 Hz),float,,semitones,A,keep
+client_pitch_range_st,calls,p90 − p10 of CLIENT F0,float,,semitones,A,keep
+agent_intensity_std_db,calls,Std of AGENT intensity on voiced frames,float,,dB,A,keep
+client_escalation,calls,Slope of per-turn mean z(F0 st)+z(intensity) over normalized time; null if < 4 turns,float,,z per call,A,keep
+sentiment_start,calls,Mean score of first 3 CLIENT turns >= 3 words,float,,P(POS)-P(NEG),D,keep
+sentiment_end,calls,Mean score of last 3 CLIENT turns >= 3 words,float,,P(POS)-P(NEG),D,keep
+sentiment_delta,calls,sentiment_end − sentiment_start,float,,,D,keep
+sentiment_min,calls,Minimum CLIENT turn score,float,,,D,keep
+agent_questions,calls,AGENT sentences ending in ?,int,,,D,keep
+politeness_markers,calls,Politeness lexicon hits in AGENT turns,int,,,D,keep
+lexical_richness_mattr,calls,MATTR (window 50) on AGENT tokens (TTR if < 50 tokens),float,,,D,keep
+fillers_per_min,calls,Filler lexicon hits per AGENT speech minute (kept only if validated vs WER refs),float,,1/min,D,keep
+agent_discourse_similarity,calls,Mean cosine of AGENT-turn centroid to same-group calls' centroids,float,,cosine,D,keep
+blindness_guess,calls,Annotator's blind guess of agent type (validation only),enum,human;ai;unsure,,L,flag
+call_id,turns,Call ID,str,,,D,keep
+group,turns,Agent type,enum,human;ai,,D,keep
+turn_id,turns,Turn ID within call (canonical),str,,,D,keep
+role,turns,Role of the speaker,enum,AGENT;CLIENT;THIRD_PARTY;SYSTEM;UNKNOWN,,D,keep
+start_s,turns,Turn start (file time),float,,s,D,keep
+end_s,turns,Turn end (file time),float,,s,D,keep
+duration_s,turns,end_s − start_s,float,,s,D,keep
+n_words,turns,Words in the turn,int,,,D,keep
+is_interruption,turns,Turn starts as an interruption,bool,,,D,keep
+latency_s,turns,Floor-transfer latency (null with overlap / first turn / same role),float,,s,D,keep
+n_backchannels_received,turns,Backchannels by others inside the turn,int,,,D,keep
+asr_confidence,turns,Duration-weighted mean word probability in the turn,float,,,D,keep
+sentiment,turns,P(POS) − P(NEG); CLIENT turns with >= 3 words only,float,,,D,keep
+contains_censor,turns,A censor span is inside the turn,bool,,,A,keep
+call_id,objections,Call ID,str,,,D,keep
+group,objections,Agent type,enum,human;ai,,D,keep
+objection_idx,objections,1-based index within call,int,,,D,keep
+turn_id,objections,Turn where the objection is raised,str,,,L,not_validated
+time_s,objections,Turn start − conv_start,float,,s,D over L,not_validated
+type,objections,Objection type,enum,no_money;already_paid;call_later;doesnt_recognize_debt;wrong_amount;wants_discount;distrust_who_is_calling;annoyed_by_calls;asks_for_human;other,,L,not_validated
+agent_technique,objections,Agent's response technique,enum,empathy_validation;clarification;alternative_offer;consequences;reschedule;ignores_repeats_script;escalates,,L,not_validated
+response_turn_id,objections,Agent turn responding to the objection,str,,,L,not_validated
+resolved,objections,yes = client moves forward; partial = acknowledged but hesitant; no = persists / call ends on it,enum,yes;partial;no,,L,not_validated
+call_id,offers,Call ID,str,,,D,keep
+group,offers,Agent type,enum,human;ai,,D,keep
+offer_idx,offers,1-based index within call,int,,,D,keep
+turn_id,offers,Turn of the offer,str,,,L,not_validated
+time_s,offers,Turn start − conv_start,float,,s,D over L,not_validated
+proposed_by,offers,Who proposes,enum,agent;client,,L,not_validated
+type,offers,Offer type,enum,full_payment;minimum_installment;partial_payment;refinancing_restructuring;discount_forgiveness;extra_time,,L,not_validated
+amount,offers,Amount (null if none or censored),float,,COP,L,not_validated
+amount_censored,offers,Amount mentioned but censored,bool,,,L,not_validated
+date_text,offers,"Date as stated (""censored"" if censored)",str,,,L,not_validated

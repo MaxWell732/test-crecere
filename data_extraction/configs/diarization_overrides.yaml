@@ -1,0 +1,13 @@
+# Per-call diarization overrides (decision D-023).
+# Only for calls where the default community-1 run merged agent and client into one speaker ("collapse") AND a variant
+# was shown to separate them by reading its sentence-level speaker view (scripts/diarization_variants.py).
+# Changing an entry makes only that call stale (cache key suffix "ov<hash>"); downstream stages follow via fingerprints.
+#   pipeline:     pyannote pipeline id (default: diarization.pipeline in pipeline.yaml)
+#   num_speakers: fixed speaker count (otherwise min/max_speakers)
+overrides:
+  C020: {pipeline: pyannote/speaker-diarization-3.1, num_speakers: 2, reason: "collapse 100%; 3.1 num2 splits opening and main exchange"}
+  C039: {num_speakers: 2, reason: "collapse 100%; community-1 num2 separates client interjections (19%)"}
+  C055: {num_speakers: 2, reason: "collapse 100%; community-1 num2 separates client answers"}
+  C061: {num_speakers: 2, reason: "collapse 100%; community-1 num2 separates wrong-person answers"}
+  C067: {num_speakers: 2, reason: "collapse 100%; community-1 num2 separates client after the opening"}
+  C092: {pipeline: pyannote/speaker-diarization-3.1, num_speakers: 2, reason: "collapse 92%; 3.1 num2 separates client explanation"}
