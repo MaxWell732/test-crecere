@@ -1,0 +1,46 @@
+name: Publicar informe
+
+# Publica el informe HTML de 2 páginas en GitHub Pages, para que se vea
+# renderizado en el navegador en vez de como código fuente.
+# Requiere activarlo una vez en: Settings -> Pages -> Source: "GitHub Actions".
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'data_analysis/outputs/results_report/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Preparar el sitio
+        run: |
+          mkdir -p _site
+          cp data_analysis/outputs/results_report/informe_humanos_vs_ia.html _site/index.html
+          cp data_analysis/outputs/results_report/informe_humanos_vs_ia.html _site/
+          touch _site/.nojekyll
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

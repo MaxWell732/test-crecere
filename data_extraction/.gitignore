@@ -2,7 +2,15 @@
 data/
 *.wav
 *.parquet
+
+# Secrets — never tracked
 .env
+.env.*
+!.env.example
+*.pem
+*.key
+**/huggingface/token
+**/huggingface/stored_tokens
 
 # Environment, caches, model downloads (all confined to this directory)
 .venv/
@@ -11,3 +19,7 @@ __pycache__/
 *.pyc
 .pytest_cache/
 .ruff_cache/
+
+# Logs and OS cruft
+*.log
+.DS_Store

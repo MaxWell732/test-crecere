@@ -1,0 +1,31 @@
+[project]
+name = "crecere-audio-analytics"
+version = "1.0.0"
+description = "Fase 2 — análisis estadístico y generación del informe humanos vs. IA en cobranza telefónica."
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "pandas>=2.2",
+    "numpy>=2.0",
+    "scipy>=1.13",
+    "statsmodels>=0.14",       # GEE, logística ordinal
+    "matplotlib>=3.9",
+    "seaborn>=0.13",
+    "pyarrow>=17",             # lectura/escritura columnar en pandas
+]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=6.29",         # ejecutar el notebook desde VS Code / Jupyter
+    "jupyterlab>=4.2",         # abrirlo de forma autónoma
+    "nbconvert>=7.16",         # reejecutar el notebook sin interfaz
+]
+
+# La Fase 1 (data_extraction/) es un proyecto independiente con su propio
+# pyproject.toml, .venv y lockfile: no forma parte de este workspace.
+[tool.uv.workspace]
+members = []
+exclude = ["data_extraction"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"

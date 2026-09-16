@@ -7,7 +7,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 CONFIGS = ROOT / "configs"
 SCHEMAS = CONFIGS / "schemas"
-DOCS = ROOT / "docs"
 CACHE = ROOT / ".cache"
 
 DATA = ROOT / "data"

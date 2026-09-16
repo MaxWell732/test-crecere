@@ -434,8 +434,6 @@ def run() -> int:
                     if extract_key in ("clarity", "empathy", "active_listening") and pb.get(c) is None:
                         continue
                     pred = EXTRACT[extract_key](pa[c], pb.get(c))
-                    if metric == "exact":
-                        pred = pred
                     pairs.append((parse_gold(gold_rows[c].get(gcol), metric, name), pred))
                 return agreement(metric, name, pairs)
 

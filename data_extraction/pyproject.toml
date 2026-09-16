@@ -1,0 +1,70 @@
+[project]
+name = "collections-ai-vs-human"
+version = "0.1.0"
+description = "Audio -> validated tables extraction pipeline for collections calls (AI vs human agents)."
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    # core
+    "numpy>=2.0",
+    "scipy>=1.13",
+    "pandas>=2.2",
+    "pyarrow>=17",
+    "pyyaml>=6",
+    "soundfile>=0.12",
+    "soxr>=0.5",
+    "tqdm>=4.66",
+    "jsonschema>=4.23",
+    "rapidfuzz>=3.9",
+    "scikit-learn>=1.5",
+    "jiwer>=3.0",
+    "referencing>=0.35",       # imported directly by extraction.annot_utils
+    # audio models (torch pinned to a cu126 build that still ships Pascal sm_61 kernels)
+    "torch==2.11.*",
+    "torchaudio==2.11.*",
+    "torchcodec>=0.11,<0.12",
+    "faster-whisper>=1.2",
+    "ctranslate2>=4.5",        # imported directly by extraction.envcheck
+    "pyannote.audio>=4.0.7",
+    "silero-vad>=6.0",
+    # features
+    "praat-parselmouth>=0.4.4",
+    "pysentimiento>=0.7.3",
+    "sentence-transformers>=3.0",
+]
+
+[project.scripts]
+extract = "extraction.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[build-system]
+requires = ["uv_build>=0.12,<0.13"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "extraction"
+
+[tool.uv]
+# Keep uv's cache inside the project (filesystem confinement). The managed Python
+# location can only be set via env (UV_PYTHON_INSTALL_DIR) -> scripts/env.sh.
+cache-dir = ".cache/uv"
+link-mode = "copy"            # avoid hardlink/reflink surprises on the project volume
+python-preference = "only-managed"
+
+[[tool.uv.index]]
+name = "pytorch-cu126"
+url = "https://download.pytorch.org/whl/cu126"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu126" }
+torchaudio = { index = "pytorch-cu126" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"

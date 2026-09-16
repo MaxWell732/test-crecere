@@ -1,7 +1,7 @@
 # Lexicons used by E3 (hallucination blacklist), E7 (masking) and E8c (friction, politeness, fillers, D proposals).
 # Matching is done on NORMALIZED text: casefold, accents stripped (á->a, ñ kept as n), punctuation -> space,
 # whitespace collapsed. Patterns below are therefore written lowercase and accent-free.
-# Any change: bump configs/pipeline.yaml `version` and log it in docs/decisions.md.
+# Any change: bump configs/pipeline.yaml `version`.
 
 # E3: segment text that normalizes to exactly one of these is dropped (logged).
 hallucination_blacklist:

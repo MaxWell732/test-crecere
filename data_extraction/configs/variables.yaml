@@ -7,7 +7,7 @@
 # depends:  [roles] / [asr] — deterministic variables inherit `flag` when role accuracy / WER differ by group (E10).
 # validate_with: {gold: <gold_annotations.csv column>, metric: kappa|wkappa|exact|spearman|f1}; L variables without it
 #           are judged on self-consistency κ (rerun vs first run) and can at best be `flag` (D-013).
-# Any change: bump configs/pipeline.yaml `version`, log in docs/decisions.md.
+# Any change: bump configs/pipeline.yaml `version`.
 
 tables:
   calls:

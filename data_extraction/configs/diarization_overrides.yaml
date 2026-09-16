@@ -1,6 +1,6 @@
 # Per-call diarization overrides (decision D-023).
 # Only for calls where the default community-1 run merged agent and client into one speaker ("collapse") AND a variant
-# was shown to separate them by reading its sentence-level speaker view (scripts/diarization_variants.py).
+# was shown to separate them by reading its sentence-level speaker view.
 # Changing an entry makes only that call stale (cache key suffix "ov<hash>"); downstream stages follow via fingerprints.
 #   pipeline:     pyannote pipeline id (default: diarization.pipeline in pipeline.yaml)
 #   num_speakers: fixed speaker count (otherwise min/max_speakers)

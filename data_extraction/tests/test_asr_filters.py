@@ -1,13 +1,13 @@
 from extraction.asr import attempt_chain, collapse_repeats, confidence, post_filter
+from extraction.config import load_config
+from extraction.textnorm import normalize
+
+A = load_config()["asr"]
 
 
 def test_attempt_chain_keeps_primary_model_before_fallback_model():
     chain = attempt_chain({"model": "large-v3", "fallback_model": "large-v3-turbo", "device": "cuda"})
     assert chain == [("large-v3", "cuda"), ("large-v3", "cpu"), ("large-v3-turbo", "cuda"), ("large-v3-turbo", "cpu")]
-from extraction.config import load_config
-from extraction.textnorm import normalize
-
-A = load_config()["asr"]
 
 
 def seg(i, start, end, text, cr=1.2, probs=None):

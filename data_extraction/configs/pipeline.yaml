@@ -1,5 +1,5 @@
 # Pipeline parameters. Operational definitions & thresholds live here.
-# NEVER change silently: any change -> bump `version`, log in docs/decisions.md,
+# NEVER change silently: any change -> bump `version`,
 # re-run affected stages (stage caches are keyed on a hash of the relevant sections).
 version: 8   # v2: censor = 1 kHz beep (D-016) · v3: E5 sentence smoothing (D-021) + full-call role inputs (D-022) · v4: per-call diarization overrides (D-023) · v5: codebook v2 (D-025) · v6: minimum rows for reliability decisions (D-028) · v7: variables removed from calls, codebook v3 (D-029) · v8: publication cleanup, no Drive ids, raw_source ../data/raw (D-030)
 seed: 20260912
@@ -30,7 +30,7 @@ censor:
   noise_flatness: 0.5
   noise_min_ms: 150
   merge_gap_ms: 20           # candidate runs of the same type closer than this are merged before the min-duration test
-  # implementation parameters (not in spec §7; see docs/decisions.md D-004)
+  # implementation parameters (not in spec §7)
   energy_floor_dbfs: -60     # frames quieter than this are never tone/noise candidates
   tone_min_freq_hz: 100      # spectral peak search starts here (ignores DC / mains hum)
   noise_smooth_frames: 5     # flatness computed on a 5-frame moving-average spectrum (raw periodogram of white noise ~0.56)
@@ -124,7 +124,7 @@ validation:
   kappa_flag: 0.4
   exact_match_keep: 0.8
   group_gap_flag: 0.2          # |metric_human - metric_ai| above this = "marked gap" (annotation metrics)
-  # implementation parameters (not in spec §7; see docs/decisions.md D-013)
+  # implementation parameters (not in spec §7)
   exact_match_flag: 0.6        # exact match: >= exact_match_keep keep, >= this flag, else drop
   wer_gap_flag: 0.05           # |WER_human - WER_ai| above this -> ASR-dependent D variables inherit `flag`
   role_accuracy_gap_flag: 0.05 # |role_acc_human - role_acc_ai| above this -> role-dependent D variables inherit `flag`

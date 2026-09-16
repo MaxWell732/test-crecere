@@ -35,7 +35,7 @@ def run() -> int:
 
         cap = torch.cuda.get_device_capability(0) if cuda else None
         _line(cuda_kernels_ok(), "kernels for device capability (sm_6x ≤ 6.1) + cuDNN conv on cuda",
-              f"capability {cap}; see docs/decisions.md D-007") or (failures := failures + 1)
+              f"capability {cap}") or (failures := failures + 1)
         if cuda:
             try:
                 a = torch.randn(256, 256, device="cuda")
@@ -78,7 +78,7 @@ def run() -> int:
             failures += 0 if ok is None else 1
             _line(ok, f"import {mod}", f"{type(exc).__name__}: {str(exc)[:160]}")
 
-    _line(None, "ffmpeg on PATH", shutil.which("ffmpeg") or "absent (not required: see docs/decisions.md)")
+    _line(None, "ffmpeg on PATH", shutil.which("ffmpeg") or "absent (not required)")
     token_path = paths.CACHE / "huggingface" / "token"
     _line(token_path.exists() or bool(os.environ.get("HF_TOKEN")), "Hugging Face token (H2)",
           "present" if token_path.exists() else "absent -> run scripts/hf_login.sh")

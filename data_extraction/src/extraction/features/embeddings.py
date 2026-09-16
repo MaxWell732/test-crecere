@@ -8,6 +8,7 @@ centroids of the other calls of the same group) is computed in E11, where group 
 from __future__ import annotations
 
 import glob
+from collections import Counter
 from typing import Any
 
 import numpy as np
@@ -79,8 +80,9 @@ def objection_qa() -> int:
                                          linkage="average").fit_predict(emb)
     else:
         labels = [0] * len(items)
-    for lab in sorted(set(labels), key=lambda l: -list(labels).count(l)):
-        members = [it for it, l in zip(items, labels) if l == lab]
+    label_counts = Counter(labels)
+    for lab in sorted(label_counts, key=lambda label: -label_counts[label]):
+        members = [it for it, label in zip(items, labels) if label == lab]
         lines += [f"## Cluster {lab} ({len(members)})", ""] + [f"- {c} {t}: “{q}”" for c, t, q in members] + [""]
     out.write_text("\n".join(lines), encoding="utf-8")
     print(f"wrote {out.relative_to(paths.ROOT)} ({len(items)} quotes)")
