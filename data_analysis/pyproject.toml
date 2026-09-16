@@ -1,3 +1,5 @@
+# Fase 2 del proyecto. La Fase 1 (../data_extraction/) es un proyecto independiente,
+# con su propio pyproject.toml, lockfile y entorno virtual.
 [project]
 name = "crecere-audio-analytics"
 version = "1.0.0"
@@ -19,12 +21,6 @@ dev = [
     "jupyterlab>=4.2",         # abrirlo de forma autónoma
     "nbconvert>=7.16",         # reejecutar el notebook sin interfaz
 ]
-
-# La Fase 1 (data_extraction/) es un proyecto independiente con su propio
-# pyproject.toml, .venv y lockfile: no forma parte de este workspace.
-[tool.uv.workspace]
-members = []
-exclude = ["data_extraction"]
 
 [tool.ruff]
 line-length = 110

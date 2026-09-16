@@ -99,6 +99,9 @@ crecere-audio-analytics/
 │   └── tests/                        # 10 módulos de pruebas (pytest)
 │
 ├── data_analysis/                    # ───── FASE 2 ─────
+│   ├── pyproject.toml                # dependencias del análisis (uv)
+│   ├── uv.lock                       # versiones exactas de la Fase 2
+│   ├── .python-version               # 3.12
 │   ├── notebooks/
 │   │   └── audio_data_analysis.ipynb # análisis completo, 8 secciones
 │   └── outputs/
@@ -108,9 +111,6 @@ crecere-audio-analytics/
 │           └── informe_humanos_vs_ia.html
 │
 ├── .github/workflows/                # CI (ruff + 60 tests) y publicación del informe
-├── pyproject.toml                    # dependencias de la Fase 2 (uv)
-├── uv.lock                           # versiones exactas de la Fase 2
-├── .python-version                   # 3.12
 ├── LICENSE                           # MIT
 └── README.md
 ```
@@ -132,12 +132,13 @@ cd test-crecere
 No requiere los audios ni GPU: consume solo los CSV de `data/cleaned/`, que están en el repositorio.
 
 ```bash
+cd data_analysis
 uv sync                                  # instala las versiones exactas de uv.lock
-uv run --group dev jupyter lab           # abrir data_analysis/notebooks/audio_data_analysis.ipynb
+uv run jupyter lab                       # abrir notebooks/audio_data_analysis.ipynb
 
 # o reejecutar el notebook entero sin interfaz:
-uv run --group dev jupyter nbconvert --to notebook --execute --inplace \
-    data_analysis/notebooks/audio_data_analysis.ipynb
+uv run jupyter nbconvert --to notebook --execute --inplace \
+    notebooks/audio_data_analysis.ipynb
 ```
 
 Salidas: las 8 figuras a 300 dpi en `data_analysis/outputs/images/` y las tablas en `outputs/tables/`.
@@ -150,7 +151,7 @@ Salidas: las 8 figuras a 300 dpi en `data_analysis/outputs/images/` y las tablas
 Requiere los 100 WAV originales —que **no** se publican— y una GPU con ≥ 4 GB de VRAM.
 
 ```bash
-cd data_extraction
+cd data_extraction                       # desde la raíz del repositorio
 source scripts/env.sh                    # confina cachés, modelos y temporales al proyecto
 uv sync                                  # ~170 paquetes, incluye torch cu126
 
